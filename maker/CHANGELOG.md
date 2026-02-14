@@ -17,6 +17,13 @@
   - Customizable: dot size, spacing, speed
   - Deployed to `output/halftone-gen.html`
 
+- **Black Seed Generator** (`output/black-seed.html`)
+  - Organic branching seed patterns with growth animation
+  - Recursive branching up to 4 generations
+  - Seed pods at branch tips
+  - Speed controls + pause/resume
+  - Deployed to `output/black-seed.html`
+
 ### Research
 - Monitored r/generative, Hacker News, r/LocalLLaMA feeds
-- Identified Truchet Sphere and Halftone patterns as trending generative art concepts
+- Identified Truchet Sphere, Halftone, Black Seed as trending generative art concepts

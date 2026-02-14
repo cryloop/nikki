@@ -1,17 +1,21 @@
-# Active Project: Truchet Sphere Generator
+# Active Project: Black Seed Generator
 
-**Started:** Feb 14, 2026 - 7:30 PM UTC
+**Started:** Feb 14, 2026 - 7:50 PM UTC
+**Status:** ✅ COMPLETE
 
-## Concept
-A 3D visualization that maps classic Truchet tile patterns onto a spherical surface. Users can control:
-- Tile size
-- Color scheme (multiple presets)
-- Rotation speed
-- Tile type (quarter circles, diagonal lines, diamonds)
+## What Was Built
+- Organic branching seed patterns with growth animation
+- Multiple seed stems radiating from center
+- Recursive branching (up to 4 generations)
+- Seed pods at branch tips
+- Warm organic color palette
+- Speed controls (slow/medium/fast)
+- Pause/resume functionality
 
-## Next Steps
-1. [x] Create project folder structure
-2. [ ] Build HTML/JS implementation with Canvas
-3. [ ] Add controls for customization
-4. [ ] Test and polish
-5. [ ] Deploy to output/
+## Deployed
+`output/black-seed.html`
+
+## Next Project Ideas
+1. **OP Art Generator** - Optical illusion patterns
+2. **Still Counting** - Time-based evolving system
+3. **Winterscape** - Snowy generative landscape

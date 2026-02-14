@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Black Seed Generator</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      background: #0a0a0a;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Instrument Serif', Georgia, serif;
+      color: #e8e4dc;
+      overflow: hidden;
+    }
+    
+    canvas {
+      border-radius: 4px;
+      box-shadow: 0 0 80px rgba(0,0,0,0.8);
+    }
+    
+    .controls {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 12px;
+      background: rgba(20,20,20,0.85);
+      padding: 14px 24px;
+      border-radius: 40px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    
+    button {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #a8a498;
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-family: inherit;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    button:hover {
+      background: rgba(255,255,255,0.08);
+      color: #e8e4dc;
+      border-color: rgba(255,255,255,0.3);
+    }
+    
+    button.active {
+      background: rgba(255,255,255,0.12);
+      color: #fff;
+      border-color: rgba(255,255,255,0.4);
+    }
+    
+    .title {
+      position: fixed;
+      top: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 13px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.3);
+    }
+  </style>
+</head>
+<body>
+  <div class="title">Black Seed</div>
+  <canvas id="canvas"></canvas>
+  <div class="controls">
+    <button onclick="regenerate()">Regenerate</button>
+    <button onclick="setGrowth('slow')" id="btn-slow">Slow</button>
+    <button onclick="setGrowth('medium')" id="btn-medium" class="active">Medium</button>
+    <button onclick="setGrowth('fast')" id="btn-fast">Fast</button>
+    <button onclick="togglePause()" id="btn-pause">Pause</button>
+  </div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+let width, height, centerX, centerY;
+let seeds = [];
+let paused = false;
+let growthSpeed = 0.015;
+let animationId;
+
+function resize() {
+  const size = Math.min(window.innerWidth * 0.85, window.innerHeight * 0.75);
+  width = height = size;
+  canvas.width = width * window.devicePixelRatio;
+  canvas.height = height * window.devicePixelRatio;
+  canvas.style.width = width + 'px';
+  canvas.style.height = height + 'px';
+  ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+  centerX = width / 2;
+  centerY = height / 2;
+}
+
+class Seed {
+  constructor(x, y, angle, generation) {
+    this.x = x;
+    this.y = y;
+    this.angle = angle;
+    this.generation = generation;
+    this.length = 0;
+    this.maxLength = (15 + Math.random() * 25) * (1 - generation * 0.12);
+    this.speed = 0.3 + Math.random() * 0.4;
+    this.thickness = Math.max(1, 4 - generation * 1.2);
+    this.branches = [];
+    this.ended = false;
+    this.spawnTimer = 0;
+    this.hue = Math.random() * 30 + 20; // warm browns
+    this.saturation = Math.random() * 20 + 30;
+  }
+  
+  update(dt) {
+    if (this.ended) return;
+    
+    this.length += this.speed * growthSpeed * 60 * dt;
+    
+    if (this.length > this.maxLength * 0.4 && this.branches.length === 0 && this.generation < 4) {
+      this.spawnTimer += dt;
+      if (this.spawnTimer > 0.5 && Math.random() < 0.03) {
+        const branchAngle = (Math.random() - 0.5) * Math.PI * 0.6;
+        this.branches.push(new Seed(
+          this.x + Math.cos(this.angle) * this.length * 0.7,
+          this.y + Math.sin(this.angle) * this.length * 0.7,
+          this.angle + branchAngle,
+          this.generation + 1
+        ));
+      }
+    }
+    
+    if (this.length >= this.maxLength) {
+      this.ended = true;
+    }
+    
+    this.branches.forEach(b => b.update(dt));
+  }
+  
+  draw() {
+    const endX = this.x + Math.cos(this.angle) * this.length;
+    const endY = this.y + Math.sin(this.angle) * this.length;
+    
+    ctx.beginPath();
+    ctx.moveTo(this.x, this.y);
+    ctx.lineTo(endX, endY);
+    
+    const alpha = 1 - this.generation * 0.2;
+    const lightness = 35 + this.generation * 8;
+    ctx.strokeStyle = `hsla(${this.hue}, ${this.saturation}%, ${lightness}%, ${alpha})`;
+    ctx.lineWidth = this.thickness;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+    
+    // Draw seed pod at end
+    if (this.length > this.maxLength * 0.8) {
+      const podSize = this.thickness * 1.5;
+      ctx.beginPath();
+      ctx.arc(endX, endY, podSize, 0, Math.PI * 2);
+      ctx.fillStyle = `hsla(${this.hue}, ${this.saturation}%, ${lightness + 15}%, ${alpha * 0.8})`;
+      ctx.fill();
+    }
+    
+    this.branches.forEach(b => b.draw());
+  }
+}
+
+function init() {
+  seeds = [];
+  // Start from center with multiple seeds
+  const numSeeds = 6 + Math.floor(Math.random() * 4);
+  for (let i = 0; i < numSeeds; i++) {
+    const angle = (i / numSeeds) * Math.PI * 2 + Math.random() * 0.3;
+    seeds.push(new Seed(centerX, centerY, angle, 0));
+  }
+}
+
+let lastTime = performance.now();
+
+function animate(currentTime) {
+  const dt = Math.min((currentTime - lastTime) / 1000, 0.1);
+  lastTime = currentTime;
+  
+  // Semi-transparent fade for trail effect
+  ctx.fillStyle = 'rgba(10, 10, 10, 0.08)';
+  ctx.fillRect(0, 0, width, height);
+  
+  if (!paused) {
+    seeds.forEach(seed => seed.update(dt));
+  }
+  
+  seeds.forEach(seed => seed.draw());
+  
+  animationId = requestAnimationFrame(animate);
+}
+
+function regenerate() {
+  init();
+}
+
+function setGrowth(speed) {
+  document.querySelectorAll('.controls button').forEach(b => {
+    if (b.id.startsWith('btn-') && b.id !== 'btn-pause') b.classList.remove('active');
+  });
+  document.getElementById('btn-' + speed).classList.add('active');
+  
+  if (speed === 'slow') growthSpeed = 0.007;
+  else if (speed === 'medium') growthSpeed = 0.015;
+  else growthSpeed = 0.035;
+}
+
+function togglePause() {
+  paused = !paused;
+  document.getElementById('btn-pause').textContent = paused ? 'Resume' : 'Pause';
+}
+
+window.addEventListener('resize', () => {
+  resize();
+  init();
+});
+
+resize();
+init();
+animate(performance.now());
+</script>
+</body>
+</html>
