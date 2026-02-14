@@ -1,18 +1,15 @@
-# Active Project: Geometric Bloom Generator
+# Active Project: OP Art Generator
 
-**Started:** Feb 14, 2026 - 8:15 PM UTC
+**Started:** Feb 14, 2026 - 8:20 PM UTC
 **Status:** ✅ COMPLETE
 
 ## What Was Built
-- Procedural flower-like geometric patterns with rotating petal rings
-- 6 color themes (Aurora, Sunset, Ocean, Forest, Monochrome, Neon)
-- Multiple petal ring layers with independent rotation speeds
-- Center pattern with layered star shapes
-- Twinkling background stars
-- Interactive: click to regenerate, Space to pause, Theme button
+- 6 OP Art pattern types: Waves, Concentric, Radiating Lines, Chevron, Breathing Circles, Tunnel
+- 6 color themes (Classic B&W, Neon Pulse, Warm Gradient, Cool Ocean, Vintage, Retro)
+- Interactive: click to regenerate, Space to pause, Arrow Up/Down to change patterns
 
 ## Deployed
-`output/geometric-bloom.html`
+`output/op-art.html`
 
 ## Next Project Ideas
 1. **Particle Flow Field** - Flowing particles with mouse interaction

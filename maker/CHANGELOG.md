@@ -1,5 +1,14 @@
 # Changelog
 
+## Feb 14, 2026 - Session 3
+
+### Added
+- **OP Art Generator** (`output/op-art.html`)
+  - 6 OP Art pattern types: Waves, Concentric, Radiating Lines, Chevron, Breathing Circles, Tunnel
+  - 6 color themes (Classic B&W, Neon Pulse, Warm Gradient, Cool Ocean, Vintage, Retro)
+  - Interactive: click to regenerate, Space to pause, Arrow Up/Down to change patterns
+  - Based on trending r/generative post about Bridget Riley style optical art
+
 ## Feb 14, 2026 - Session 2
 
 ### Added
