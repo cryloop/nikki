@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Geometric Bloom</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;500&display=swap');
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      background: #0a0a0f;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Cormorant Garamond', serif;
+      overflow: hidden;
+    }
+    
+    canvas {
+      border-radius: 50%;
+      box-shadow: 
+        0 0 60px rgba(255, 180, 220, 0.15),
+        0 0 120px rgba(180, 140, 255, 0.1);
+    }
+    
+    .controls {
+      position: fixed;
+      bottom: 30px;
+      display: flex;
+      gap: 15px;
+      z-index: 10;
+    }
+    
+    .btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #e0d0e8;
+      padding: 10px 22px;
+      font-family: inherit;
+      font-size: 14px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: 30px;
+      transition: all 0.3s ease;
+    }
+    
+    .btn:hover {
+      background: rgba(255, 200, 220, 0.15);
+      border-color: rgba(255, 180, 220, 0.4);
+      box-shadow: 0 0 20px rgba(255, 180, 220, 0.2);
+    }
+    
+    .hint {
+      position: fixed;
+      top: 30px;
+      color: rgba(255, 255, 255, 0.3);
+      font-size: 13px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+    
+    .title {
+      position: fixed;
+      top: 60px;
+      color: rgba(255, 200, 220, 0.6);
+      font-size: 28px;
+      font-weight: 300;
+      letter-spacing: 8px;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+  <div class="hint">click to bloom · space to pause</div>
+  <div class="title">Geometric Bloom</div>
+  <canvas id="canvas"></canvas>
+  <div class="controls">
+    <button class="btn" id="newBtn">New Bloom</button>
+    <button class="btn" id="themeBtn">Theme</button>
+    <button class="btn" id="pauseBtn">Pause</button>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    const themes = [
+      { name: 'Aurora', colors: ['#ff6b9d', '#c44dff', '#4d9fff', '#4dffb8', '#ffea4d'] },
+      { name: 'Sunset', colors: ['#ff2d2d', '#ff8c1a', '#ffdd1a', '#ff6b6b', '#ffaaaa'] },
+      { name: 'Ocean', colors: ['#006994', '#009dc4', '#00d4aa', '#48d1cc', '#20b2aa'] },
+      { name: 'Forest', colors: ['#2d5a27', '#4a7c42', '#7cb342', '#c5e1a5', '#aed581'] },
+      { name: 'Monochrome', colors: ['#ffffff', '#dddddd', '#bbbbbb', '#999999', '#777777'] },
+      { name: 'Neon', colors: ['#ff00ff', '#00ffff', '#ffff00', '#ff0080', '#80ff00'] }
+    ];
+    
+    let width, centerX, centerY;
+    let themeIndex = 0;
+    let paused = false;
+    let time = 0;
+    let animationId;
+    
+    const bloom = {
+      petalRings: [],
+      centerPattern: null,
+      bgStars: []
+    };
+    
+    function resize() {
+      const size = Math.min(window.innerWidth * 0.85, window.innerHeight * 0.7);
+      width = size;
+      canvas.width = size;
+      canvas.height = size;
+      centerX = size / 2;
+      centerY = size / 2;
+    }
+    
+    function random(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+    
+    function randomInt(min, max) {
+      return Math.floor(random(min, max + 1));
+    }
+    
+    function generateBloom() {
+      bloom.petalRings = [];
+      const ringCount = randomInt(4, 8);
+      
+      for (let i = 0; i < ringCount; i++) {
+        const petals = randomInt(6, 20) + i * 2;
+        const radius = 30 + i * random(20, 35);
+        const rotationSpeed = random(0.002, 0.015) * (i % 2 === 0 ? 1 : -1);
+        const petalLength = random(0.3, 0.7);
+        const startAngle = random(0, Math.PI * 2);
+        
+        bloom.petalRings.push({
+          petals,
+          radius,
+          rotationSpeed,
+          petalLength,
+          startAngle,
+          rotation: 0,
+          colorOffset: i * 40
+        });
+      }
+      
+      // Center pattern
+      bloom.centerPattern = {
+        radius: random(15, 30),
+        layers: randomInt(2, 5),
+        rotationSpeed: random(0.01, 0.03)
+      };
+      
+      // Background stars
+      bloom.bgStars = [];
+      for (let i = 0; i < 80; i++) {
+        bloom.bgStars.push({
+          x: random(0, width),
+          y: random(0, width),
+          size: random(0.5, 2),
+          alpha: random(0.1, 0.5),
+          twinkleSpeed: random(0.02, 0.05)
+        });
+      }
+    }
+    
+    function drawStar(x, y, size, alpha, twinkle) {
+      ctx.beginPath();
+      ctx.arc(x, y, size, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255, 255, 255, ${alpha * twinkle})`;
+      ctx.fill();
+    }
+    
+    function drawPetalRing(ring) {
+      const colors = themes[themeIndex].colors;
+      
+      for (let i = 0; i < ring.petals; i++) {
+        const angle = ring.startAngle + ring.rotation + (i * Math.PI * 2 / ring.petals);
+        const colorIndex = (i + ring.colorOffset) % colors.length;
+        
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        ctx.rotate(angle);
+        
+        const petalWidth = (Math.PI * 2 / ring.petals) * ring.radius * 0.8;
+        const petalLength = ring.radius * ring.petalLength;
+        
+        // Draw petal
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.bezierCurveTo(
+          petalWidth * 0.5, petalLength * 0.3,
+          petalWidth * 0.5, petalLength * 0.7,
+          0, petalLength
+        );
+        ctx.bezierCurveTo(
+          -petalWidth * 0.5, petalLength * 0.7,
+          -petalWidth * 0.5, petalLength * 0.3,
+          0, 0
+        );
+        
+        const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, petalLength);
+        gradient.addColorStop(0, colors[colorIndex]);
+        gradient.addColorStop(1, colors[colorIndex] + '88');
+        
+        ctx.fillStyle = gradient;
+        ctx.fill();
+        
+        // Petal outline
+        ctx.strokeStyle = colors[colorIndex] + '44';
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+        
+        ctx.restore();
+      }
+    }
+    
+    function drawCenter() {
+      const cp = bloom.centerPattern;
+      const colors = themes[themeIndex].colors;
+      
+      ctx.save();
+      ctx.translate(centerX, centerY);
+      
+      for (let layer = 0; layer < cp.layers; layer++) {
+        const radius = cp.radius * (1 - layer * 0.15);
+        const points = 8 + layer * 4;
+        const rotation = time * cp.rotationSpeed * (layer + 1) * (layer % 2 === 0 ? 1 : -1);
+        
+        ctx.beginPath();
+        for (let i = 0; i <= points; i++) {
+          const angle = rotation + (i * Math.PI * 2 / points);
+          const r = i % 2 === 0 ? radius : radius * 0.6;
+          const x = Math.cos(angle) * r;
+          const y = Math.sin(angle) * r;
+          
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+        
+        const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, radius);
+        gradient.addColorStop(0, colors[layer % colors.length]);
+        gradient.addColorStop(1, colors[(layer + 1) % colors.length] + '66');
+        
+        ctx.fillStyle = gradient;
+        ctx.fill();
+        
+        ctx.strokeStyle = colors[layer % colors.length] + '88';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+      
+      // Inner glow
+      const glowGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, cp.radius * 0.5);
+      glowGradient.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
+      glowGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      ctx.fillStyle = glowGradient;
+      ctx.beginPath();
+      ctx.arc(0, 0, cp.radius * 0.5, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.restore();
+    }
+    
+    function drawBackgroundStars() {
+      bloom.bgStars.forEach(star => {
+        const twinkle = 0.5 + 0.5 * Math.sin(time * star.twinkleSpeed);
+        drawStar(star.x, star.y, star.size, star.alpha, twinkle);
+      });
+    }
+    
+    function draw() {
+      // Clear with subtle trail
+      ctx.fillStyle = 'rgba(10, 10, 15, 0.15)';
+      ctx.fillRect(0, 0, width, width);
+      
+      // Full clear occasionally
+      if (time % 60 < 2) {
+        ctx.fillStyle = '#0a0a0f';
+        ctx.fillRect(0, 0, width, width);
+      }
+      
+      drawBackgroundStars();
+      
+      // Draw petal rings (back to front)
+      bloom.petalRings.forEach(ring => {
+        drawPetalRing(ring);
+        ring.rotation += ring.rotationSpeed;
+      });
+      
+      drawCenter();
+    }
+    
+    function animate() {
+      if (!paused) {
+        time++;
+        draw();
+      }
+      animationId = requestAnimationFrame(animate);
+    }
+    
+    function init() {
+      resize();
+      generateBloom();
+      
+      // Initial full clear
+      ctx.fillStyle = '#0a0a0f';
+      ctx.fillRect(0, 0, width, width);
+      
+      animate();
+    }
+    
+    // Event listeners
+    document.getElementById('newBtn').addEventListener('click', () => {
+      ctx.fillStyle = '#0a0a0f';
+      ctx.fillRect(0, 0, width, width);
+      generateBloom();
+    });
+    
+    document.getElementById('themeBtn').addEventListener('click', () => {
+      themeIndex = (themeIndex + 1) % themes.length;
+    });
+    
+    document.getElementById('pauseBtn').addEventListener('click', () => {
+      paused = !paused;
+      document.getElementById('pauseBtn').textContent = paused ? 'Resume' : 'Pause';
+    });
+    
+    canvas.addEventListener('click', () => {
+      ctx.fillStyle = '#0a0a0f';
+      ctx.fillRect(0, 0, width, width);
+      generateBloom();
+    });
+    
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        paused = !paused;
+        document.getElementById('pauseBtn').textContent = paused ? 'Resume' : 'Pause';
+      }
+    });
+    
+    window.addEventListener('resize', () => {
+      resize();
+      ctx.fillStyle = '#0a0a0f';
+      ctx.fillRect(0, 0, width, width);
+    });
+    
+    init();
+  </script>
+</body>
+</html>

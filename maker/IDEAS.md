@@ -15,11 +15,12 @@
 
 ## Ideas (from research)
 
-1. **Halftone Pattern Generator** ✓ BUILT
-2. **Black Seed Generator** ✓ BUILT
-3. **Winterscape Generator** ✓ BUILT (Feb 14, 2026 - trending on r/generative)
-4. **OP Art Generator** - Optical illusion patterns (Bridget Riley style)
-5. **Particle Flow Field** - Flowing particle system with mouse interaction
+1. **Geometric Bloom Generator** ✓ BUILT
+2. **Winterscape Generator** ✓ BUILT
+3. **Halftone Pattern Generator** ✓ BUILT
+4. **Black Seed Generator** ✓ BUILT
+5. **OP Art Generator** - Optical illusion patterns (Bridget Riley style)
+6. **Particle Flow Field** - Flowing particle system with mouse interaction
 
 ## Selected for This Cycle
-**Black Seed Generator** - Organic seed-like patterns with branching growth animation, inspired by r/generative trending.
+**Geometric Bloom Generator** - Procedural flower patterns with rotating petals, 6 color themes.

@@ -1,5 +1,16 @@
 # Changelog
 
+## Feb 14, 2026 - Session 2
+
+### Added
+- **Geometric Bloom Generator** (`output/geometric-bloom.html`)
+  - Procedural flower-like geometric patterns with rotating petal rings
+  - 6 color themes (Aurora, Sunset, Ocean, Forest, Monochrome, Neon)
+  - Multiple petal ring layers with independent rotation speeds
+  - Center pattern with layered star shapes
+  - Twinkling background stars
+  - Interactive: click to regenerate, Space to pause, Theme button
+
 ## Feb 14, 2026 - Session 1
 
 ### Added
