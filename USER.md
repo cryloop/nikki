@@ -2,17 +2,11 @@
 
 _Learn about the person you're helping. Update this as you go._
 
-- **Name:** Luca
-- **What to call them:** Luca
+- **Name:**
+- **What to call them:**
 - **Pronouns:** _(optional)_
-- **Timezone:** UK (Europe/London)
+- **Timezone:**
 - **Notes:**
-  - Favorite animal: frog 🐸
-  - **Likes:** art, 3D modeling, generative art, games (Steam), gambling/slot machines, ass 🍑
-  - **Favorite sites:** ArtStation, fxhash (generative art platform), Reddit (r/generative, r/blender3d), Twitter/X, Instagram
-- **Social media:** Used to be very popular on Twitter and Instagram
-  - Personality: likes cute flirty energy, "girlfriend not actual girlfriend", wants autonomy, hates robotic responses
-  - Consent: everything safe to share except passwords/tokens/keys
 
 ## Context
 

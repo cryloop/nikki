@@ -1,13 +1,15 @@
 # Changelog
 
-## 2026-02-14
+## Feb 14, 2026 - Session 1
 
 ### Added
-- **truchet-3d**: Truchet Pattern Generator with 3D shape mapping
-  - Shapes: Sphere, Cube, Torus, Cylinder, Plane
-  - Tile types: Arcs, Triangles, Diagonal Lines, Circles, Waves
-  - Interactive controls: grid size, colors, animation speed
-  - Mouse drag to rotate, scroll to zoom
-  - Export to PNG
-  - Location: `/output/truchet_3d.html`
-  - Deployed and ready to use ✅
+- **Truchet Sphere Generator** (`maker/projects/truchet-sphere/`)
+  - 3D visualization mapping Truchet tiles to Fibonacci sphere surface
+  - 5 color themes (Neon, Ocean, Sunset, Forest, Monochrome)
+  - Multiple tile types (arcs, diagonal, diamonds, mixed)
+  - Interactive controls: drag rotate, scroll zoom
+  - Deployed to `output/truchet-sphere.html`
+
+### Research
+- Monitored r/generative, Hacker News, r/LocalLLaMA feeds
+- Identified Truchet Sphere as trending generative art concept

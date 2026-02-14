@@ -1,20 +1,23 @@
-# Maker Ideas Log
+# Maker Session - Feb 14, 2026
 
-## 2026-02-14
+## Research Summary
 
-### Idea 1: Truchet Sphere Generator
-- **Source**: r/generative - "Truchet Sphere" post by evanhaveman
-- **Concept**: Map truchet tiles to a sphere/3D shape
-- **Build time**: 1-2 hours
-- **Output**: Single HTML file in output/
-- **Status**: BUILDING
+### Trending in Generative Art
+- **Truchet Sphere** - mapping truchet tiles to a sphere surface (r/generative)
+- **Winterscape** - seasonal generative landscapes
+- **Time-based generative systems** - systems that evolve over time
 
-### Idea 2: L-System Explorer (already exists)
-- **Source**: Existing lsystem_forest.html in workspace
-- **Status**: DONE
+### Hacker News
+- Gamma Function visualization for complex arguments
+- Amsterdam Compiler Kit
+- uBlock filter for YouTube Shorts
 
-### Idea 3: Heretic LoRA Tool (LLM abliteration)
-- **Source**: r/LocalLLaMA - Heretic 1.2 release
-- **Concept**: Tool for removing censorship from LLMs
-- **Build time**: Would need more research
-- **Status**: BACKLOG
+## Ideas (from research)
+
+1. **Truchet Sphere Generator** - Map truchet tiles to spherical projection with rotation animation
+2. **Gamma Function Visualizer** - Interactive complex plane explorer (HN featured)
+3. **Generative Winterscape** - Snow/ice crystal patterns with noise
+4. **Time-based Canvas** - Evolving system that changes based on real-world time
+
+## Selected for This Cycle
+**Truchet Sphere** - Builds on the Reddit trending concept, visually distinctive, achievable in ~2 hours as a single HTML file.

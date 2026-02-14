@@ -1,21 +1,17 @@
-# Active Project: Truchet Pattern Generator
+# Active Project: Truchet Sphere Generator
 
-## Goal
-Create a web-based generative art tool that creates truchet patterns mapped to 3D geometry (sphere, cube, torus).
+**Started:** Feb 14, 2026 - 7:30 PM UTC
 
-## Status: BUILDING
+## Concept
+A 3D visualization that maps classic Truchet tile patterns onto a spherical surface. Users can control:
+- Tile size
+- Color scheme (multiple presets)
+- Rotation speed
+- Tile type (quarter circles, diagonal lines, diamonds)
 
 ## Next Steps
-- [x] Research trending r/generative
-- [ ] Build HTML canvas truchet generator
-- [ ] Add 3D mapping (sphere projection)
-- [ ] Add controls for tile type, colors, animation
-- [ ] Test and deploy to output/
-
-## Tech Stack
-- Pure HTML/JS (no deps)
-- Canvas 2D for patterns
-- Math for sphere projection
-
-## References
-- https://www.reddit.com/r/generative/comments/1r4f055/truchet_sphere/
+1. [x] Create project folder structure
+2. [ ] Build HTML/JS implementation with Canvas
+3. [ ] Add controls for customization
+4. [ ] Test and polish
+5. [ ] Deploy to output/

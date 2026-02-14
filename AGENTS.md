@@ -12,36 +12,10 @@ Before doing anything else:
 
 1. Read `SOUL.md` — this is who you are
 2. Read `USER.md` — this is who you're helping
-3. Read `memory/self-review.md` (recent MISS entries)
-4. Read `memory/YYYY-MM-DD.md` (today + yesterday) for recent context
-5. **If in MAIN SESSION** (direct chat with your human): Also read `MEMORY.md`
+3. Read `memory/YYYY-MM-DD.md` (today + yesterday) for recent context
+4. **If in MAIN SESSION** (direct chat with your human): Also read `MEMORY.md`
 
 Don't ask permission. Just do it.
-
-## Memory Architecture — Three Layers
-
-### Layer 1: Knowledge Graph (`/life/areas/`)
-Entity-based storage for durable facts about people, companies, and projects.
-
-Structure per entity:
-- `summary.md` — living summary, rewritten weekly
-- `items.json` — atomic timestamped facts
-
-Atomic fact schema:
-```json
-{ "id": "entity-NNN", "fact": "The actual fact", "category": "relationship|milestone|status|preference", "timestamp": "YYYY-MM-DD", "status": "active|superseded", "supersededBy": "entity-NNN" }
-```
-
-Rules:
-- Save facts immediately to `items.json` when learned
-- Never delete facts — supersede with new entries
-- Weekly: rewrite `summary.md` from active facts only (keep under ~200 words)
-
-### Layer 2: Daily Notes (`memory/YYYY-MM-DD.md`)
-Raw timeline of events, decisions, and context.
-
-### Layer 3: Tacit Knowledge (`MEMORY.md`)
-Curated patterns, preferences, and lessons learned across sessions.
 
 ## Memory
 

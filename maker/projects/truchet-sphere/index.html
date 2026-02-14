@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Truchet Sphere</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;500&display=swap');
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background: #0a0a0f;
+            color: #e0e0e0;
+            font-family: 'JetBrains Mono', monospace;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        
+        h1 {
+            font-weight: 300;
+            font-size: 1.8rem;
+            letter-spacing: 0.3em;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            font-size: 0.7rem;
+            color: #666;
+            letter-spacing: 0.2em;
+            margin-bottom: 24px;
+        }
+        
+        .canvas-container {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 
+                0 0 60px rgba(78, 205, 196, 0.15),
+                0 0 120px rgba(255, 107, 107, 0.1);
+        }
+        
+        canvas {
+            display: block;
+            cursor: grab;
+        }
+        
+        canvas:active { cursor: grabbing; }
+        
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-top: 24px;
+            padding: 20px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.05);
+            max-width: 700px;
+            justify-content: center;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 120px;
+        }
+        
+        label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: #888;
+        }
+        
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 120px;
+            height: 4px;
+            background: #222;
+            border-radius: 2px;
+            outline: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            background: #4ecdc4;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+        
+        select {
+            background: #1a1a1f;
+            color: #e0e0e0;
+            border: 1px solid #333;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+        
+        select:focus {
+            outline: none;
+            border-color: #4ecdc4;
+        }
+        
+        .value-display {
+            font-size: 0.7rem;
+            color: #4ecdc4;
+            min-width: 30px;
+        }
+        
+        .color-presets {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .color-btn {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        
+        .color-btn:hover { transform: scale(1.15); }
+        .color-btn.active { border-color: #fff; }
+        
+        .info {
+            margin-top: 20px;
+            font-size: 0.65rem;
+            color: #555;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Truchet Sphere</h1>
+    <p class="subtitle">Generative spherical patterns</p>
+    
+    <div class="canvas-container">
+        <canvas id="canvas" width="600" height="600"></canvas>
+    </div>
+    
+    <div class="controls">
+        <div class="control-group">
+            <label>Tile Size</label>
+            <input type="range" id="tileSize" min="8" max="40" value="20">
+        </div>
+        
+        <div class="control-group">
+            <label>Rotation</label>
+            <input type="range" id="rotation" min="0" max="100" value="30">
+        </div>
+        
+        <div class="control-group">
+            <label>Tile Type</label>
+            <select id="tileType">
+                <option value="arcs">Quarter Arcs</option>
+                <option value="diagonal">Diagonal Lines</option>
+                <option value="diamonds">Diamonds</option>
+                <option value="mixed">Mixed</option>
+            </select>
+        </div>
+        
+        <div class="control-group">
+            <label>Colors</label>
+            <div class="color-presets">
+                <div class="color-btn active" data-theme="neon" style="background: linear-gradient(135deg, #ff6b6b, #4ecdc4)"></div>
+                <div class="color-btn" data-theme="ocean" style="background: linear-gradient(135deg, #0ea5e9, #06b6d4)"></div>
+                <div class="color-btn" data-theme="sunset" style="background: linear-gradient(135deg, #f59e0b, #ef4444)"></div>
+                <div class="color-btn" data-theme="forest" style="background: linear-gradient(135deg, #22c55e, #14b8a6)"></div>
+                <div class="color-btn" data-theme="monochrome" style="background: linear-gradient(135deg, #f0f0f0, #404040)"></div>
+            </div>
+        </div>
+        
+        <div class="control-group">
+            <label>Sphere Size</label>
+            <input type="range" id="sphereSize" min="150" max="280" value="220">
+        </div>
+        
+        <div class="control-group">
+            <label>Randomize</label>
+            <button onclick="randomize()" style="background: #1a1a1f; color: #e0e0e0; border: 1px solid #333; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 0.7rem;">🎲 Shuffle</button>
+        </div>
+    </div>
+    
+    <p class="info">Drag to rotate • Scroll to zoom</p>
+    
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        const themes = {
+            neon: { bg: '#0a0a0f', primary: '#ff6b6b', secondary: '#4ecdc4', accent: '#45b7d1', lines: '#ffffff20' },
+            ocean: { bg: '#0a1520', primary: '#0ea5e9', secondary: '#06b6d4', accent: '#22d3ee', lines: '#ffffff15' },
+            sunset: { bg: '#150a0a', primary: '#f59e0b', secondary: '#ef4444', accent: '#fb923c', lines: '#ffffff20' },
+            forest: { bg: '#0a150f', primary: '#22c55e', secondary: '#14b8a6', accent: '#34d399', lines: '#ffffff15' },
+            monochrome: { bg: '#0a0a0a', primary: '#f0f0f0', secondary: '#606060', accent: '#a0a0a0', lines: '#ffffff30' }
+        };
+        
+        let theme = themes.neon;
+        let tileSize = 20;
+        let rotationSpeed = 0.3;
+        let sphereRadius = 220;
+        let tileType = 'arcs';
+        
+        let rotationX = 0.4;
+        let rotationY = 0;
+        let isDragging = false;
+        let lastMouse = { x: 0, y: 0 };
+        let time = 0;
+        
+        // Generate tile pattern grid
+        let tileGrid = [];
+        const gridSize = 24;
+        
+        function generateGrid() {
+            tileGrid = [];
+            for (let i = 0; i < gridSize; i++) {
+                tileGrid[i] = [];
+                for (let j = 0; j < gridSize; j++) {
+                    tileGrid[i][j] = {
+                        type: tileType === 'mixed' ? ['arcs', 'diagonal', 'diamonds'][Math.floor(Math.random() * 3)] : tileType,
+                        flip: Math.random() > 0.5,
+                        color: Math.random() > 0.5 ? 'primary' : 'secondary'
+                    };
+                }
+            }
+        }
+        
+        function project3D(x, y, z, cx, cy) {
+            // Simple perspective projection with rotation
+            const cosX = Math.cos(rotationX);
+            const sinX = Math.sin(rotationX);
+            const cosY = Math.cos(rotationY);
+            const sinY = Math.sin(rotationY);
+            
+            // Rotate around Y
+            let x1 = x * cosY - z * sinY;
+            let z1 = x * sinY + z * cosY;
+            
+            // Rotate around X
+            let y1 = y * cosX - z1 * sinX;
+            let z2 = y * sinX + z1 * cosX;
+            
+            // Perspective
+            const scale = 400 / (400 + z2);
+            
+            return {
+                x: cx + x1 * scale,
+                y: cy + y1 * scale,
+                z: z2,
+                visible: z2 > -sphereRadius
+            };
+        }
+        
+        function drawTruchetTile(cx, cy, size, tile, opacity = 1) {
+            const colors = {
+                primary: theme.primary,
+                secondary: theme.secondary,
+                accent: theme.accent
+            };
+            
+            ctx.save();
+            ctx.globalAlpha = opacity;
+            ctx.strokeStyle = colors[tile.color];
+            ctx.lineWidth = 2;
+            
+            const half = size / 2;
+            
+            if (tile.type === 'arcs') {
+                ctx.beginPath();
+                if (tile.flip) {
+                    ctx.arc(cx - half, cy - half, half, 0, Math.PI / 2);
+                    ctx.moveTo(cx + half, cy - half);
+                    ctx.arc(cx + half, cy + half, half, Math.PI, Math.PI * 1.5);
+                } else {
+                    ctx.arc(cx + half, cy - half, half, Math.PI / 2, Math.PI);
+                    ctx.moveTo(cx - half, cy + half);
+                    ctx.arc(cx - half, cy + half, half, Math.PI * 1.5, Math.PI * 2);
+                }
+                ctx.stroke();
+            } else if (tile.type === 'diagonal') {
+                ctx.beginPath();
+                if (tile.flip) {
+                    ctx.moveTo(cx - half, cy - half);
+                    ctx.lineTo(cx + half, cy + half);
+                } else {
+                    ctx.moveTo(cx + half, cy - half);
+                    ctx.lineTo(cx - half, cy + half);
+                }
+                ctx.stroke();
+            } else if (tile.type === 'diamonds') {
+                ctx.beginPath();
+                ctx.moveTo(cx, cy - half);
+                ctx.lineTo(cx + half, cy);
+                ctx.lineTo(cx, cy + half);
+                ctx.lineTo(cx - half, cy);
+                ctx.closePath();
+                ctx.stroke();
+                
+                // Inner diamond
+                ctx.beginPath();
+                const inner = half * 0.4;
+                ctx.moveTo(cx, cy - inner);
+                ctx.lineTo(cx + inner, cy);
+                ctx.lineTo(cx, cy + inner);
+                ctx.lineTo(cx - inner, cy);
+                ctx.closePath();
+                ctx.stroke();
+            }
+            
+            ctx.restore();
+        }
+        
+        function drawSphere() {
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+            
+            // Background
+            ctx.fillStyle = theme.bg;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Generate tiles on sphere surface using fibonacci sphere
+            const numTiles = gridSize * gridSize;
+            const phi = Math.PI * (3 - Math.sqrt(5));
+            
+            let tiles = [];
+            
+            for (let i = 0; i < numTiles; i++) {
+                const y = 1 - (i / (numTiles - 1)) * 2;
+                const radius = Math.sqrt(1 - y * y);
+                const theta = phi * i;
+                
+                const x = Math.cos(theta) * radius;
+                const z = Math.sin(theta) * radius;
+                
+                const tile = tileGrid[i % gridSize][Math.floor(i / gridSize) % gridSize];
+                
+                tiles.push({
+                    x: x * sphereRadius,
+                    y: y * sphereRadius,
+                    z: z * sphereRadius,
+                    tile: tile,
+                    baseY: y
+                });
+            }
+            
+            // Sort by z for depth
+            tiles.sort((a, b) => {
+                const projA = project3D(a.x, a.y, a.z, cx, cy);
+                const projB = project3D(b.x, b.y, b.z, cx, cy);
+                return projA.z - projB.z;
+            });
+            
+            // Draw tiles
+            for (const t of tiles) {
+                if (!t.tile) continue;
+                
+                const proj = project3D(t.x, t.y, t.z, cx, cy);
+                
+                if (proj.visible) {
+                    // Calculate opacity based on z-depth
+                    const depthFactor = (proj.z + sphereRadius) / (sphereRadius * 2);
+                    const opacity = 0.3 + depthFactor * 0.7;
+                    
+                    // Size based on perspective
+                    const sizeScale = 0.5 + depthFactor * 0.5;
+                    
+                    drawTruchetTile(proj.x, proj.y, tileSize * sizeScale, t.tile, opacity);
+                }
+            }
+            
+            // Sphere outline glow
+            const outlineGradient = ctx.createRadialGradient(cx, cy, sphereRadius * 0.8, cx, cy, sphereRadius);
+            outlineGradient.addColorStop(0, 'transparent');
+            outlineGradient.addColorStop(0.9, theme.primary + '10');
+            outlineGradient.addColorStop(1, 'transparent');
+            
+            ctx.beginPath();
+            ctx.arc(cx, cy, sphereRadius, 0, Math.PI * 2);
+            ctx.fillStyle = outlineGradient;
+            ctx.fill();
+        }
+        
+        function animate() {
+            rotationY += rotationSpeed * 0.01;
+            time += 0.016;
+            
+            drawSphere();
+            requestAnimationFrame(animate);
+        }
+        
+        // Event listeners
+        canvas.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            lastMouse = { x: e.clientX, y: e.clientY };
+        });
+        
+        canvas.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                const dx = e.clientX - lastMouse.x;
+                const dy = e.clientY - lastMouse.y;
+                rotationY += dx * 0.01;
+                rotationX += dy * 0.01;
+                rotationX = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, rotationX));
+                lastMouse = { x: e.clientX, y: e.clientY };
+            }
+        });
+        
+        canvas.addEventListener('mouseup', () => isDragging = false);
+        canvas.addEventListener('mouseleave', () => isDragging = false);
+        
+        canvas.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            sphereRadius = Math.max(150, Math.min(280, sphereRadius + e.deltaY * 0.5));
+            document.getElementById('sphereSize').value = sphereRadius;
+        });
+        
+        // Controls
+        document.getElementById('tileSize').addEventListener('input', (e) => {
+            tileSize = parseInt(e.target.value);
+        });
+        
+        document.getElementById('rotation').addEventListener('input', (e) => {
+            rotationSpeed = parseInt(e.target.value) / 100;
+        });
+        
+        document.getElementById('tileType').addEventListener('change', (e) => {
+            tileType = e.target.value;
+            generateGrid();
+        });
+        
+        document.getElementById('sphereSize').addEventListener('input', (e) => {
+            sphereRadius = parseInt(e.target.value);
+        });
+        
+        // Color presets
+        document.querySelectorAll('.color-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                theme = themes[btn.dataset.theme];
+            });
+        });
+        
+        function randomize() {
+            generateGrid();
+            rotationSpeed = (Math.random() - 0.5) * 0.6;
+            document.getElementById('rotation').value = (rotationSpeed + 0.5) * 100;
+            tileSize = 12 + Math.floor(Math.random() * 28);
+            document.getElementById('tileSize').value = tileSize;
+        }
+        
+        // Initialize
+        generateGrid();
+        animate();
+    </script>
+</body>
+</html>
