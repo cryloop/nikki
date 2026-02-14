@@ -1,21 +1,20 @@
-# Active Project: Black Seed Generator
+# Active Project: Winterscape Generator
 
-**Started:** Feb 14, 2026 - 7:50 PM UTC
+**Started:** Feb 14, 2026 - 8:00 PM UTC
 **Status:** ✅ COMPLETE
 
 ## What Was Built
-- Organic branching seed patterns with growth animation
-- Multiple seed stems radiating from center
-- Recursive branching (up to 4 generations)
-- Seed pods at branch tips
-- Warm organic color palette
-- Speed controls (slow/medium/fast)
-- Pause/resume functionality
+- Snowy generative landscape with procedural mountains (3 layers)
+- Falling snowflakes with depth and wind simulation
+- Procedural pine trees with snow caps
+- Glowing moon with craters
+- Twinkling stars
+- Interactive controls: regenerate, toggle snow/wind/moon
 
 ## Deployed
-`output/black-seed.html`
+`output/winterscape.html`
 
 ## Next Project Ideas
 1. **OP Art Generator** - Optical illusion patterns
-2. **Still Counting** - Time-based evolving system
-3. **Winterscape** - Snowy generative landscape
+2. **Particle Flow Field** - Flowing particles with mouse interaction
+3. **Starry Night Flow** - Van Gogh inspired flowing sky

@@ -3,6 +3,15 @@
 ## Feb 14, 2026 - Session 1
 
 ### Added
+- **Winterscape Generator** (`output/winterscape.html`)
+  - Snowy generative landscape with procedural mountains (3 layers)
+  - Falling snowflakes with depth and wind simulation
+  - Procedural pine trees with snow caps
+  - Glowing moon with craters
+  - Twinkling stars
+  - Interactive controls: regenerate, toggle snow/wind/moon
+  - High DPI canvas support
+
 - **Truchet Sphere Generator** (`maker/projects/truchet-sphere/`)
   - 3D visualization mapping Truchet tiles to Fibonacci sphere surface
   - 5 color themes (Neon, Ocean, Sunset, Forest, Monochrome)
@@ -26,4 +35,4 @@
 
 ### Research
 - Monitored r/generative, Hacker News, r/LocalLLaMA feeds
-- Identified Truchet Sphere, Halftone, Black Seed as trending generative art concepts
+- Identified Truchet Sphere, Halftone, Black Seed, Winterscape as trending generative art concepts

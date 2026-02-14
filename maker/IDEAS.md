@@ -17,8 +17,9 @@
 
 1. **Halftone Pattern Generator** ✓ BUILT
 2. **Black Seed Generator** ✓ BUILT
-3. **Time-based Canvas** - System that evolves based on real-world time
+3. **Winterscape Generator** ✓ BUILT (Feb 14, 2026 - trending on r/generative)
 4. **OP Art Generator** - Optical illusion patterns (Bridget Riley style)
+5. **Particle Flow Field** - Flowing particle system with mouse interaction
 
 ## Selected for This Cycle
 **Black Seed Generator** - Organic seed-like patterns with branching growth animation, inspired by r/generative trending.
