@@ -10,6 +10,13 @@
   - Interactive controls: drag rotate, scroll zoom
   - Deployed to `output/truchet-sphere.html`
 
+- **Halftone Pattern Generator** (`maker/projects/halftone-gen/`)
+  - Interactive halftone dot patterns with 5 animation styles
+  - 5 color themes (Classic, Vintage, Cyberpunk, Sepia, Ocean)
+  - Mouse influence on patterns
+  - Customizable: dot size, spacing, speed
+  - Deployed to `output/halftone-gen.html`
+
 ### Research
 - Monitored r/generative, Hacker News, r/LocalLLaMA feeds
-- Identified Truchet Sphere as trending generative art concept
+- Identified Truchet Sphere and Halftone patterns as trending generative art concepts
