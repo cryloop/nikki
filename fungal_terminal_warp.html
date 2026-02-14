@@ -1,0 +1,476 @@
+<!doctype html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>Fungal Terminal Warp</title>
+<script src='https://cdn.jsdelivr.net/npm/p5@1.9.4/lib/p5.min.js'></script>
+<style>
+  :root{--bg:#07080b;--panel:#0e1117cc;--line:#2a2f3a;--txt:#e9f3ff;--mut:#9aa3b2;--a:#c7f9cc;--b:#a8dadc;--c:#ff79c6;--d:#ffb86c}
+  body{margin:0;background:radial-gradient(1000px 700px at 16% 12%,#141b2a,transparent 62%),radial-gradient(900px 700px at 82% 18%,#1a1233,transparent 58%),radial-gradient(900px 700px at 55% 92%,#0e241d,transparent 60%),#07080b;color:var(--txt);font-family:Inter,system-ui}
+  #ui{position:fixed;top:12px;left:12px;z-index:10;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 12px;backdrop-filter:blur(8px);box-shadow:0 18px 60px #0008}
+  button{border:none;border-radius:12px;padding:10px 12px;font-weight:900;cursor:pointer;background:linear-gradient(135deg,var(--b),var(--a));color:#061017}
+  button.ghost{background:transparent;border:1px solid var(--line);color:var(--mut)}
+  button.secondary{background:#1f2a3a;color:var(--txt);border:1px solid var(--line);font-weight:800}
+  .tiny{font-size:12px;color:var(--mut)}
+  .seed{font-weight:900}
+  input{background:#0d141d;border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:10px 10px;min-width:220px;outline:none}
+  a{color:var(--b)}
+  #toast{position:fixed;bottom:16px;left:16px;opacity:0;transform:translateY(10px);transition:.25s;}
+  #toast.show{opacity:1;transform:translateY(0)}
+  canvas{display:block;margin:0 auto}
+</style></head>
+<body>
+<div id='ui'>
+  <div class='card'>
+    <div class='tiny'>Fungal Terminal Warp</div>
+    <div class='tiny'>seed: <span class='seed' id='seedLabel'>-</span></div>
+  </div>
+  <div class='card'>
+    <button class='secondary' id='new'>New</button>
+    <button class='ghost' id='copy'>Copy Link</button>
+    <button id='save'>Save PNG</button>
+  </div>
+  <div class='card'>
+    <div class='tiny'>tagline</div>
+    <input id='tag' placeholder='leave blank for chaos'/>
+  </div>
+  <div class='card tiny'>traits: <span id='traitsLabel' class='seed'>-</span></div>
+  <div class='card tiny'><a href='./'>back to hub</a></div>
+</div>
+<div id='toast' class='card tiny'>copied</div>
+
+<script>
+let W=1200,H=1500;
+let seed=123456;
+let tagline='';
+
+function parseSeed(){
+  const u=new URL(location.href);
+  const s=u.searchParams.get('seed');
+  if(s && /^\d+$/.test(s)) return parseInt(s,10);
+  return Math.floor(Math.random()*900000)+100000;
+}
+function getTag(){
+  const u=new URL(location.href);
+  return (u.searchParams.get('tag')||'').slice(0,60);
+}
+function setURL(){
+  const u=new URL(location.href);
+  u.searchParams.set('seed', String(seed));
+  if(tagline) u.searchParams.set('tag', tagline);
+  else u.searchParams.delete('tag');
+  history.replaceState({},'',u.toString());
+}
+
+function toast(msg='copied'){
+  const el=document.getElementById('toast');
+  el.textContent=msg;
+  el.classList.add('show');
+  clearTimeout(window.__t);
+  window.__t=setTimeout(()=>el.classList.remove('show'),900);
+}
+
+function pickPal(){
+  // fxhash-ish palettes (haunting but beautiful)
+  const pals = [
+    {bg:[7,8,11], ink:[230,240,255], a:[168,218,220], b:[199,249,204], c:[255,121,198], d:[255,184,108]},
+    {bg:[6,7,9],  ink:[245,242,232], a:[140,255,218], b:[109,168,255], c:[255,90,154],  d:[255,226,125]},
+    {bg:[6,8,10], ink:[236,248,255], a:[120,196,255], b:[82,255,191],  c:[196,132,255], d:[255,180,90]},
+    {bg:[7,7,9],  ink:[238,243,255], a:[255,92,92],  b:[116,192,252], c:[81,207,102],  d:[255,212,59]}
+  ];
+  return pals[seed % pals.length];
+}
+
+let pg; // offscreen for post
+
+function setup(){
+  const cnv=createCanvas(W,H);
+  pixelDensity(1);
+  cnv.style('margin-top','88px');
+  noLoop();
+
+  seed=parseSeed();
+  tagline=getTag();
+  document.getElementById('seedLabel').textContent=seed;
+  document.getElementById('tag').value=tagline;
+
+  pg = createGraphics(W,H);
+  pg.pixelDensity(1);
+
+  renderFrame();
+}
+
+function renderFrame(){
+  randomSeed(seed); noiseSeed(seed);
+  tagline=(document.getElementById('tag').value||'').trim().slice(0,60);
+  setURL();
+
+  const P = pickPal();
+const traitRoll = (k)=>{
+    // deterministic-ish traits from seed
+    const v = noise(seed*0.001 + k*11.7, seed*0.002 - k*3.1);
+    return v;
+  };
+  const TRAITS = {
+    cathedralRibs: traitRoll(1) > 0.56,
+    biofilmLattice: traitRoll(2) > 0.56,
+    deadPixelsSnow: traitRoll(3) > 0.54,
+    abyssBloom: traitRoll(4) > 0.52,
+  };
+  const traitList = Object.entries(TRAITS).filter(([k,v])=>v).map(([k])=>k);
+  const traitPretty = (k)=>({cathedralRibs:'cathedral ribs', biofilmLattice:'biofilm lattice', deadPixelsSnow:'dead pixels', abyssBloom:'abyss bloom'}[k]||k);
+  const traitText = traitList.length? traitList.map(traitPretty).join(' · ') : 'base';
+  const el = document.getElementById('traitsLabel');
+  if(el) el.textContent = traitText;
+
+
+
+  const bg = color(...P.bg);
+  const ink = color(...P.ink);
+  const A = color(...P.a);
+  const B = color(...P.b);
+  const C = color(...P.c);
+  const D = color(...P.d);
+
+  // base
+  pg.background(bg);
+
+  // subtle film grain + paper tooth
+  pg.loadPixels();
+  for(let y=0;y<H;y++){
+    for(let x=0;x<W;x++){
+      const i=4*(y*W+x);
+      const n = (noise(x*0.006,y*0.006)*255);
+      const g = (random()*14) + (n-128)*0.08;
+      pg.pixels[i]   = constrain(pg.pixels[i]   + g, 0, 255);
+      pg.pixels[i+1] = constrain(pg.pixels[i+1] + g, 0, 255);
+      pg.pixels[i+2] = constrain(pg.pixels[i+2] + g, 0, 255);
+    }
+  }
+  pg.updatePixels();
+
+  // haunted void core (ink bloom)
+  // core position varies per seed (within a safe frame)
+  const cx = random(W*0.28, W*0.72);
+  const cy = random(H*0.34, H*0.70);
+  for(let i=0;i<28;i++){
+    const r = 40 + i*i*0.9;
+    const col = lerpColor(C, A, i/28);
+    pg.noStroke();
+    pg.fill(red(col),green(col),blue(col), 10);
+    pg.ellipse(cx + random(-6,6), cy + random(-6,6), r*2.2, r*2.0);
+  }
+
+  // warp rings (multi-ink)
+  pg.push();
+  pg.translate(cx,cy);
+  const layers = 82;
+  for(let k=0;k<layers;k++){
+    const r = map(k,0,layers-1, 16, 760);
+    const wob = 0.22 + k*0.0036;
+    const inkMix = noise(k*0.13);
+    const col = inkMix<0.33? lerpColor(A,B,inkMix/0.33) : (inkMix<0.66? lerpColor(B,C,(inkMix-0.33)/0.33) : lerpColor(C,D,(inkMix-0.66)/0.34));
+    pg.stroke(red(col), green(col), blue(col), 18);
+    pg.strokeWeight(1);
+    pg.noFill();
+    pg.beginShape();
+    const steps = 360;
+    for(let i=0;i<=steps;i++){
+      const ang = (i/steps)*TWO_PI;
+      const nx = cos(ang), ny = sin(ang);
+      const warp = noise(nx*wob + 1.1, ny*wob + 2.7, k*0.06);
+      const warp2 = noise(nx*wob*2.0 + 4.2, ny*wob*2.0 + 0.3, k*0.05);
+      const rr = r * (0.80 + warp*0.70) + (warp2-0.5)*42;
+      pg.vertex(nx*rr, ny*rr);
+    }
+    pg.endShape(CLOSE);
+  }
+  pg.pop();
+
+  // rare trait: cathedral ribs (arched skeletal structure)
+  if(TRAITS.cathedralRibs){
+    pg.push();
+    pg.translate(cx, cy);
+    const ribs = 34;
+    for(let i=0;i<ribs;i++){
+      const ang = map(i,0,ribs-1,-PI*0.95,PI*0.95);
+      const col = lerpColor(ink, C, 0.35);
+      pg.stroke(red(col),green(col),blue(col), 46);
+      pg.noFill();
+      pg.beginShape();
+      for(let t=0;t<=1.0;t+=0.04){
+        const rr = 120 + t*720 + (noise(i*0.2,t*2.5)-0.5)*60;
+        const x = cos(ang)*rr;
+        const y = sin(ang)*rr*0.58;
+        pg.vertex(x,y);
+      }
+      pg.endShape();
+    }
+    pg.pop();
+  }
+
+  // rare trait: biofilm lattice (organic cells)
+  if(TRAITS.biofilmLattice){
+    pg.noFill();
+    const cells = 520;
+    for(let i=0;i<cells;i++){
+      const x=random(0,W), y=random(0,H);
+      const r=random(16,44);
+      const col = lerpColor(B, D, noise(i*0.1));
+      pg.stroke(red(col),green(col),blue(col), 26);
+      pg.strokeWeight(1);
+      pg.beginShape();
+      const steps=28;
+      for(let k=0;k<=steps;k++){
+        const ang=(k/steps)*TWO_PI;
+        const wob=1+(noise(x*0.002+cos(ang),y*0.002+sin(ang),i*0.03)-0.5)*0.5;
+        pg.vertex(x+cos(ang)*r*wob, y+sin(ang)*r*wob);
+      }
+      pg.endShape(CLOSE);
+    }
+  }
+
+  // rare trait: dead pixels snowfall
+  if(TRAITS.deadPixelsSnow){
+    pg.noStroke();
+    for(let i=0;i<7200;i++){
+      if(random()<0.5) continue;
+      const x=floor(random(W));
+      const y=floor(random(H));
+      const col = random()<0.7? ink : lerpColor(A,C,random());
+      pg.fill(red(col),green(col),blue(col), random(10,60));
+      pg.rect(x,y, 1, 1);
+      if(random()<0.18) pg.rect(x,y, 2, 1);
+    }
+  }
+
+  // rare trait: extra abyss bloom
+  if(TRAITS.abyssBloom){
+    pg.noStroke();
+    for(let i=0;i<22;i++){
+      const col = lerpColor(C, D, i/14);
+      pg.fill(red(col),green(col),blue(col), 12);
+      pg.ellipse(cx+random(-24,24), cy+random(-24,24), 180+i*90, 160+i*80);
+    }
+  }
+
+// fungal tendrils: clustered, sketchy, with two-tone ink
+  for(let b=0;b<12;b++){
+    const ox = random(W*0.12,W*0.88);
+    const oy = random(H*0.18,H*0.92);
+    const col1 = lerpColor(B, C, random());
+    const col2 = lerpColor(A, D, random());
+    for(let t=0;t<70;t++){
+      let x=ox+random(-30,30), y=oy+random(-30,30);
+      const len = floor(random(70,160));
+      for(let i=0;i<len;i++){
+        const ang = noise(x*0.004,y*0.004,i*0.04,b*0.2)*TWO_PI*2;
+        const sp = 0.7 + noise(i*0.17,b*0.3)*2.6;
+        const nx = cos(ang)*sp;
+        const ny = sin(ang)*sp;
+        const col = (i%2==0)?col1:col2;
+        pg.stroke(red(col),green(col),blue(col), 34);
+        pg.line(x,y, x-nx*2.8, y-ny*2.8);
+        x += nx; y += ny;
+        if(x<0||x>W||y<0||y>H) break;
+      }
+    }
+  }
+
+  // spore-eye clusters (horror) — hand-drawn + abyss bleed
+  const eyes=[];
+  function wobblyBlob(x,y,r,col,alpha,steps,warp){
+    pg.noFill();
+    pg.stroke(red(col),green(col),blue(col),alpha);
+    pg.strokeWeight(1);
+    pg.beginShape();
+    for(let i=0;i<=steps;i++){
+      const ang = (i/steps)*TWO_PI;
+      const n = noise(x*0.003 + cos(ang)*0.7, y*0.003 + sin(ang)*0.7, i*0.07);
+      const rr = r * (1 + (n-0.5)*warp);
+      pg.vertex(x + cos(ang)*rr, y + sin(ang)*rr);
+    }
+    pg.endShape(CLOSE);
+  }
+
+  for(let e=0;e<28;e++){
+    const ex = random(W*0.10, W*0.90);
+    const ey = random(H*0.18, H*0.92);
+    const rr = random(18, 62);
+    const rim = lerpColor(C, D, random());
+    const iris = lerpColor(A, B, random());
+
+    // outer bloom into abyss
+    pg.noStroke();
+    pg.fill(red(rim),green(rim),blue(rim), 16);
+    pg.ellipse(ex,ey, rr*3.4, rr*3.0);
+
+    // sketchy rim
+    for(let k=0;k<5;k++) wobblyBlob(ex+random(-2,2), ey+random(-2,2), rr*1.1, rim, 40, 46, 0.35);
+
+    // sclera
+    pg.noStroke();
+    pg.fill(240,245,255, 62);
+    pg.ellipse(ex,ey, rr*1.55, rr*1.28);
+
+    // iris (wobbly)
+    pg.noStroke();
+    pg.fill(red(iris),green(iris),blue(iris), 160);
+    pg.ellipse(ex+random(-6,6), ey+random(-6,6), rr*0.78, rr*0.78);
+
+    // pupil
+    pg.fill(0,0,0, 195);
+    pg.ellipse(ex+random(-4,4), ey+random(-4,4), rr*0.28, rr*0.28);
+
+    // scratch halo
+    pg.stroke(red(rim),green(rim),blue(rim), 26);
+    for(let s=0;s<18;s++){
+      const ang = random(TWO_PI);
+      const lx = ex + Math.cos(ang)*rr*random(0.9,1.9);
+      const ly = ey + Math.sin(ang)*rr*random(0.9,1.9);
+      pg.line(ex,ey,lx,ly);
+    }
+
+    eyes.push({x:ex,y:ey,r:rr});
+  }
+
+// terminal blocks: like corrupted buffers
+  pg.noStroke();
+  const cols=78, rows=96;
+  const cw=W/cols, rh=H/rows;
+  for(let r=0;r<rows;r++){
+    for(let c=0;c<cols;c++){
+      const x=c*cw, y=r*rh;
+      const n=noise(c*0.10,r*0.10);
+      if(n>0.76 && random()<0.55){
+        const col = lerpColor(A, B, noise(c*0.3,r*0.3));
+        pg.fill(red(col),green(col),blue(col), 14);
+        pg.rect(x,y,cw,rh);
+      }
+    }
+  }
+
+  // glyph stream + glitch columns
+  pg.textFont('ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace');
+  pg.textSize(12);
+  const glyphs='01abcdef$#@*+:/-░▒▓';
+  for(let i=0;i<1500;i++){
+    const x=random(34,W-34), y=random(42,H-42);
+    const n=noise(x*0.003,y*0.003);
+    if(n>0.50){
+      const col=lerpColor(ink, A, 0.55);
+      pg.fill(red(col),green(col),blue(col), 62);
+      pg.text(glyphs[floor(random(glyphs.length))], x, y);
+    }
+  }
+  // vertical scan glitches
+  for(let k=0;k<18;k++){
+    const x = random(0,W);
+    const w = random(2,10);
+    const col = lerpColor(C, D, random());
+    pg.fill(red(col),green(col),blue(col), 12);
+    pg.rect(x,0,w,H);
+  }
+
+  // tagline stamp
+  if(tagline){
+    const col=lerpColor(ink, B, 0.55);
+    pg.fill(red(col),green(col),blue(col), 205);
+    pg.textSize(18);
+    pg.textAlign(CENTER,CENTER);
+    pg.text(tagline.toUpperCase(), W*0.5, H*0.12);
+    pg.textAlign(LEFT,BASELINE);
+    pg.textSize(12);
+  }
+
+  // post: ordered dither (preserve multi-ink) + contrast + vignette
+  image(pg,0,0);
+
+  // pixel-sort bleed around eyes
+  loadPixels();
+  for(const E of (typeof eyes!=='undefined'?eyes:[])){
+    const rx = Math.max(0, Math.floor(E.x - E.r*2.2));
+    const ry = Math.max(0, Math.floor(E.y - E.r*2.2));
+    const rw = Math.min(W-1, Math.floor(E.r*4.4));
+    const rh = Math.min(H-1, Math.floor(E.r*4.4));
+    for(let y=ry; y<ry+rh; y+=2){
+      if(random()<0.25) continue;
+      const row=[];
+      for(let x=rx; x<rx+rw; x++){
+        const i=4*(y*W+x);
+        const r=pixels[i], g=pixels[i+1], b=pixels[i+2];
+        const lum=0.2126*r+0.7152*g+0.0722*b;
+        row.push([lum,r,g,b]);
+      }
+      row.sort((a,b)=>b[0]-a[0]);
+      let x=rx;
+      for(const px of row){
+        const i=4*(y*W+x);
+        pixels[i]=px[1]; pixels[i+1]=px[2]; pixels[i+2]=px[3];
+        x++;
+      }
+    }
+  }
+  updatePixels();
+
+
+
+  // small contrast bump
+  loadPixels();
+  const bayer=[[0,8,2,10],[12,4,14,6],[3,11,1,9],[15,7,13,5]];
+  for(let y=0;y<H;y++){
+    for(let x=0;x<W;x++){
+      const i=4*(y*W+x);
+      let r=pixels[i], g=pixels[i+1], b=pixels[i+2];
+      // contrast curve
+      r = 128 + (r-128)*1.12;
+      g = 128 + (g-128)*1.12;
+      b = 128 + (b-128)*1.12;
+      // ordered dither threshold
+      const th=(bayer[y%4][x%4]/16.0)*28;
+      r = Math.max(0, Math.min(255, r + th));
+      g = Math.max(0, Math.min(255, g + th));
+      b = Math.max(0, Math.min(255, b + th));
+      // quantize each channel to 6 levels
+      r = Math.round(r/255*5)/5*255;
+      g = Math.round(g/255*5)/5*255;
+      b = Math.round(b/255*5)/5*255;
+      pixels[i]=r; pixels[i+1]=g; pixels[i+2]=b;
+    }
+  }
+  updatePixels();
+
+noFill();
+  for(let i=0;i<28;i++){
+    const a=map(i,0,27,0,120);
+    stroke(0,0,0,a);
+    rect(i*4,i*4,W-i*8,H-i*8,18);
+  }
+
+  // subtle signature
+  noStroke();
+  fill(230,240,255, 60);
+  textFont('ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace');
+  textSize(12);
+  textAlign(LEFT,BASELINE);
+  text('fungal_terminal_warp  ·  seed '+seed, 20, H-18);
+}
+
+function newSeed(){
+  seed=Math.floor(Math.random()*900000)+100000;
+  document.getElementById('seedLabel').textContent=seed;
+  renderFrame();
+}
+
+document.getElementById('new').onclick = newSeed;
+document.getElementById('save').onclick = () => saveCanvas('fungal_terminal_warp_'+seed,'png');
+document.getElementById('copy').onclick = async () => {
+  const url=new URL(location.href);
+  url.searchParams.set('seed', String(seed));
+  const tg=(document.getElementById('tag').value||'').trim();
+  if(tg) url.searchParams.set('tag', tg); else url.searchParams.delete('tag');
+  try{ await navigator.clipboard.writeText(url.toString()); toast('copied'); }
+  catch(e){ prompt('Copy link:', url.toString()); }
+};
+
+document.getElementById('tag').addEventListener('change', ()=>renderFrame());
+</script>
+</body></html>

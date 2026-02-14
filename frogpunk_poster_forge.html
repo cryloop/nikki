@@ -1,0 +1,233 @@
+<!doctype html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>Frogpunk Poster Forge</title>
+<script src='https://cdn.jsdelivr.net/npm/p5@1.9.4/lib/p5.min.js'></script>
+<style>
+  :root{--bg:#0b0f14;--panel:#111824cc;--line:#2a3a4e;--txt:#e9f3ff;--mut:#9ab1c8;--a:#50fa7b;--b:#8be9fd;--c:#ff79c6;}
+  body{margin:0;background:radial-gradient(1000px 600px at 15% 10%,#132033,#0b0f14 55%);color:var(--txt);font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
+  #ui{position:fixed;top:12px;left:12px;z-index:10;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 12px;backdrop-filter:blur(6px);box-shadow:0 16px 50px #0007}
+  button{border:none;border-radius:12px;padding:10px 12px;font-weight:800;cursor:pointer;background:#2b3a4a;color:var(--txt)}
+  button.primary{background:linear-gradient(135deg,var(--a),#2bd6ff);color:#061017}
+  button.ghost{background:transparent;border:1px solid var(--line);color:var(--mut)}
+  .tiny{font-size:12px;color:var(--mut)}
+  .seed{font-weight:900}
+  input{background:#0d141d;border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:10px 10px;min-width:220px;outline:none}
+  a{color:var(--b)}
+  #toast{position:fixed;bottom:16px;left:16px;opacity:0;transform:translateY(10px);transition:.25s;}
+  #toast.show{opacity:1;transform:translateY(0)}
+</style></head>
+<body>
+<div id='ui'>
+  <div class='card'>
+    <div class='tiny'>Frogpunk Poster Forge</div>
+    <div class='tiny'>seed: <span class='seed' id='seedLabel'>-</span></div>
+  </div>
+  <div class='card'>
+    <button class='primary' id='new'>New Poster</button>
+    <button class='ghost' id='copy'>Copy Link</button>
+    <button id='save'>Save PNG</button>
+  </div>
+  <div class='card'>
+    <div class='tiny'>tagline</div>
+    <input id='tag' placeholder='leave blank for chaos'/>
+  </div>
+  <div class='card tiny'>made for cryloop · 1080×1350 social poster</div>
+</div>
+<div id='toast' class='card tiny'>copied</div>
+
+<script>
+let W=1080,H=1350;
+let seed=123456;
+let tagline='';
+const palettes=[
+  {bg:[12,16,22], ink:[235,243,255], a:[80,250,123], b:[139,233,253], c:[255,121,198], d:[255,184,108]},
+  {bg:[8,10,13], ink:[245,240,230], a:[255,89,89], b:[116,192,252], c:[255,212,59], d:[81,207,102]},
+  {bg:[9,12,18], ink:[232,247,255], a:[107,255,214], b:[109,168,255], c:[255,90,154], d:[255,226,125]},
+];
+let P;
+
+function parseSeed(){
+  const u=new URL(location.href);
+  const s=u.searchParams.get('seed');
+  if(s && /^\d+$/.test(s)) return parseInt(s,10);
+  return Math.floor(Math.random()*900000)+100000;
+}
+
+function setup(){
+  const cnv=createCanvas(W,H);
+  pixelDensity(1);
+  cnv.style('display','block');
+  cnv.style('margin','0 auto');
+  cnv.parent(document.body);
+  seed=parseSeed();
+  redrawPoster();
+  noLoop();
+}
+
+function redrawPoster(){
+  randomSeed(seed); noiseSeed(seed);
+  P=random(palettes);
+  tagline=(document.getElementById('tag').value||'').trim();
+  if(!tagline){ tagline=makeTagline(); }
+  document.getElementById('seedLabel').textContent=seed;
+  const u=new URL(location.href); u.searchParams.set('seed',seed); history.replaceState(null,'',u);
+  drawPoster();
+}
+
+function makeTagline(){
+  const a=["FROGPUNK","SWAMPCORE","NEON TADPOLE","MUDDY FUTURE","WET WIRES","GLOW SLIME","POND SIGNAL","CHLOROPHYLL CITY","ECHO FROG","RUST BLOOM"]; 
+  const b=["EDITION","PROTOCOL","FIELD NOTES","MANIFEST","RITUAL","DRIFT","TRANSMISSION","SYSTEM","ARCHIVE","BLUEPRINT"]; 
+  const c=["#"+(100+Math.floor(random(900))),"VOL."+(1+Math.floor(random(19))),"SEED "+seed,"DAY "+(1+Math.floor(random(365))),"MK-"+(10+Math.floor(random(90)))];
+  return `${random(a)} ${random(b)} ${random(c)}`;
+}
+
+function drawPoster(){
+  // background
+  background(...P.bg);
+  // paper grain
+  loadPixels();
+  for(let y=0;y<height;y++){
+    for(let x=0;x<width;x++){
+      const i=(x+y*width)*4;
+      const n=(noise(x*0.012,y*0.012)-.5)*22 + random(-7,7);
+      pixels[i]=constrain(pixels[i]+n,0,255);
+      pixels[i+1]=constrain(pixels[i+1]+n,0,255);
+      pixels[i+2]=constrain(pixels[i+2]+n,0,255);
+    }
+  }
+  updatePixels();
+
+  // big halftone glow blob
+  noStroke();
+  const gx=width*random(.25,.75), gy=height*random(.18,.62);
+  const r=width*random(.28,.46);
+  for(let k=0;k<9000;k++){
+    const ang=random(TWO_PI);
+    const rr=r*sqrt(random());
+    const x=gx+cos(ang)*rr;
+    const y=gy+sin(ang)*rr*random(.8,1.1);
+    const t=rr/r;
+    const col = t<.35?P.c:(t<.7?P.b:P.a);
+    fill(col[0],col[1],col[2], 22*(1-t));
+    circle(x,y, random(1.5,4.5));
+  }
+
+  // fracture rings
+  stroke(P.ink[0],P.ink[1],P.ink[2],70);
+  strokeWeight(2);
+  noFill();
+  const rings=6+Math.floor(random(6));
+  for(let i=0;i<rings;i++){
+    const rr=lerp(width*0.12,width*0.48,i/(rings-1));
+    beginShape();
+    for(let a=0;a<TWO_PI+0.001;a+=0.12){
+      const wob = map(noise(cos(a)*1.4+i*0.3, sin(a)*1.4-i*0.2),0,1,-16,16);
+      vertex(gx+cos(a)*(rr+wob), gy+sin(a)*(rr+wob)*random(.92,1.06));
+    }
+    endShape();
+  }
+
+  // tendrils
+  for(let t=0;t<10;t++) tendril(random(width), height*random(.55,1.02), random(-PI/2-0.6,-PI/2+0.6), random(220,560), random(3.2,7.0));
+
+  // poster frame
+  stroke(P.ink[0],P.ink[1],P.ink[2],120);
+  strokeWeight(6);
+  noFill();
+  rect(34,34,width-68,height-68,26);
+
+  // title text
+  textAlign(LEFT,TOP);
+  noStroke();
+  fill(P.ink[0],P.ink[1],P.ink[2]);
+  textSize(58);
+  textStyle(BOLD);
+  const title = "FROGPUNK";
+  text(title, 70, 78);
+
+  // sub / tagline
+  textSize(28);
+  textStyle(NORMAL);
+  fill(P.ink[0],P.ink[1],P.ink[2],220);
+  wrapText(tagline,70,152, width-140, 34);
+
+  // seed stamp
+  push();
+  translate(width-140, height-130);
+  rotate(random(-0.2,0.2));
+  stroke(P.d[0],P.d[1],P.d[2],200);
+  strokeWeight(5);
+  noFill();
+  rect(-160,-56,320,112,18);
+  noStroke();
+  fill(P.d[0],P.d[1],P.d[2],230);
+  textAlign(CENTER,CENTER);
+  textStyle(BOLD);
+  textSize(30);
+  text("SEED "+seed, 0, 0);
+  pop();
+
+  // tiny footer
+  fill(P.ink[0],P.ink[1],P.ink[2],150);
+  textAlign(RIGHT,BOTTOM);
+  textStyle(NORMAL);
+  textSize(18);
+  text("made by nikki · for cryloop", width-56, height-48);
+}
+
+function tendril(x,y,ang,len,w){
+  let px=x, py=y;
+  stroke(P.ink[0],P.ink[1],P.ink[2],120);
+  strokeWeight(w);
+  for(let i=0;i<len;i++){
+    const t=i/len;
+    ang += map(noise(i*0.03, seed*0.001),0,1,-0.10,0.10);
+    const step=2.0+noise(i*0.05,seed*0.002)*2.0;
+    const nx=px+cos(ang)*step;
+    const ny=py+sin(ang)*step;
+    line(px,py,nx,ny);
+    if(i%22===0){
+      const b=ang+random([-1,1])*random(0.7,1.3);
+      stroke(P.a[0],P.a[1],P.a[2],90);
+      strokeWeight(max(.6,w*0.45));
+      line(nx,ny,nx+cos(b)*random(16,44),ny+sin(b)*random(16,44));
+      stroke(P.ink[0],P.ink[1],P.ink[2],120);
+      strokeWeight(w);
+    }
+    px=nx; py=ny;
+    strokeWeight(lerp(w,0.4,t));
+    if(px<-80||px>width+80||py<-80||py>height+80) break;
+  }
+}
+
+function wrapText(str,x,y,w,lineH){
+  const words=str.split(/\s+/);
+  let line='';
+  let yy=y;
+  for(let i=0;i<words.length;i++){
+    const test=line+(line?' ':'')+words[i];
+    if(textWidth(test)>w && line){
+      text(line,x,yy);
+      line=words[i];
+      yy+=lineH;
+    } else line=test;
+  }
+  if(line) text(line,x,yy);
+}
+
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),900);
+}
+
+document.getElementById('new').onclick=()=>{seed=Math.floor(Math.random()*900000)+100000; redrawPoster();};
+document.getElementById('save').onclick=()=>saveCanvas('frogpunk_'+seed,'png');
+document.getElementById('copy').onclick=async()=>{
+  try{ await navigator.clipboard.writeText(location.href); toast('link copied'); }
+  catch(e){ toast('copy failed'); }
+};
+document.getElementById('tag').addEventListener('change',()=>redrawPoster());
+</script>
+</body></html>

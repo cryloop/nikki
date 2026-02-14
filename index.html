@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>nikki</title>
+  <style>
+    :root{--bg:#07080b;--panel:#0e1117cc;--line:#2a2f3a;--txt:#e9f3ff;--mut:#9aa3b2;--a:#c7f9cc;--b:#a8dadc}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;overflow:hidden;font-family:Inter,system-ui;color:var(--txt);background:var(--bg)}
+    canvas{position:fixed;inset:0;width:100%;height:100%}
+    .wrap{position:relative;z-index:2;min-height:100vh;display:grid;place-items:center;padding:28px 16px}
+    .card{width:min(720px,100%);background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px 20px;backdrop-filter:blur(8px);box-shadow:0 22px 80px #000b}
+    .top{display:flex;justify-content:space-between;gap:12px;align-items:baseline;flex-wrap:wrap}
+    .brand{font-weight:900;letter-spacing:.2px}
+    .tiny{font-size:12px;color:var(--mut)}
+    a{color:var(--b);text-decoration:none}
+    a:hover{text-decoration:underline}
+    .list{margin:12px 0 0;padding-left:18px;display:grid;gap:10px}
+    .hint{margin-top:14px;color:var(--mut);font-size:12px}
+  </style>
+</head>
+<body>
+  <canvas id="bg"></canvas>
+  <div class="wrap">
+    <div class="card">
+      <div class="top">
+        <div class="brand">nikki</div>
+        <div class="tiny">hub</div>
+      </div>
+      <ul class="list">
+        <li><a href="frogpunk_poster_forge.html">🐸 Frogpunk Poster Forge</a></li>
+        <li><a href="fungal_terminal_warp.html">🍄 Fungal Terminal Warp</a></li>
+        <li><a href="lsystem_forest.html">🌳 L-System Forest</a></li>
+      </ul>
+      <div class="hint">Tip: if something looks "stuck", hard refresh (Ctrl+F5).</div>
+    </div>
+  </div>
+
+<script>
+const c = document.getElementById('bg');
+const ctx = c.getContext('2d');
+let W,H,DPR;
+function resize(){
+  DPR = Math.max(1, Math.min(2, devicePixelRatio||1));
+  W = c.width = Math.floor(innerWidth*DPR);
+  H = c.height = Math.floor(innerHeight*DPR);
+  c.style.width = innerWidth+'px';
+  c.style.height = innerHeight+'px';
+}
+resize();
+addEventListener('resize',resize);
+
+const t={x:0,y:0};
+onmousemove=e=>{t.x=e.clientX;t.y=e.clientY};
+
+function draw(){
+  ctx.fillStyle='rgba(7,8,11,0.03)';
+  ctx.fillRect(0,0,W,H);
+  
+  const time=Date.now()/1000;
+  
+  for(let i=0;i<3;i++){
+    const x=(Math.sin(time+i)*0.3+0.5)*W+(t.x-W/2)*0.05;
+    const y=(Math.cos(time*0.7+i)*0.3+0.5)*H+(t.y-H/2)*0.05;
+    ctx.beginPath();
+    ctx.arc(x,y,2,0,7);
+    ctx.fillStyle='rgba(168,218,220,0.3)';
+    ctx.fill();
+  }
+  
+  ctx.strokeStyle='rgba(42,47,58,0.3)';
+  ctx.lineWidth=1;
+  for(let y=0;y<H;y+=4){
+    ctx.beginPath();
+    ctx.moveTo(0,y);
+    ctx.lineTo(W,y);
+    ctx.stroke();
+  }
+  
+  requestAnimationFrame(draw);
+}
+draw();
+</script>
+</body>
+</html>
