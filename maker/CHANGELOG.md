@@ -10,3 +10,4 @@
   - Mouse drag to rotate, scroll to zoom
   - Export to PNG
   - Location: `/output/truchet_3d.html`
+  - Deployed and ready to use ✅
