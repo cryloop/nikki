@@ -1,2 +1,6 @@
-node_modules/
-*.bak
+# Keep only these files
+/index.html
+/lsystem_forest.html
+/frogpunk_poster_forge.html
+/fungal_terminal_warp.html
+/.gitignore
