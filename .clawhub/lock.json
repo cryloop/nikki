@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "skills": {
+    "desktop-control": {
+      "version": "1.0.0",
+      "installedAt": 1770952302201
+    },
+    "stealth-browser": {
+      "version": "1.0.0",
+      "installedAt": 1770989912294
+    },
+    "kesslerio-stealth-browser": {
+      "version": "1.0.0",
+      "installedAt": 1770989914222
+    },
+    "hosting": {
+      "version": "1.0.0",
+      "installedAt": 1770991572016
+    },
+    "github-image-hosting": {
+      "version": "1.0.0",
+      "installedAt": 1770991575477
+    },
+    "deploy": {
+      "version": "1.0.0",
+      "installedAt": 1770991603640
+    },
+    "agentmail": {
+      "version": "1.1.1",
+      "installedAt": 1771010903429
+    }
+  }
+}

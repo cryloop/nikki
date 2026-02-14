@@ -1,0 +1,20 @@
+{
+  "streak": 1,
+  "completed": 1,
+  "skipped": 0,
+  "difficulty": 1,
+  "last_suggestion": null,
+  "history": [
+    {
+      "event": "done",
+      "item": {
+        "category": "creative",
+        "mission": "Remix an old idea into a new angle in 5 minutes.",
+        "difficulty": 1,
+        "suggested_at": "2026-02-12T22:39:15.082677+00:00"
+      },
+      "at": "2026-02-12T22:39:15.105209+00:00"
+    }
+  ],
+  "created_at": "2026-02-12T22:39:15.082550+00:00"
+}

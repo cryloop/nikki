@@ -1,0 +1,25 @@
+{
+  "lastChecks": {
+    "ops": null,
+    "webIntel": null,
+    "workflow": null
+  },
+  "lastProactiveMessageAt": null,
+  "surpriseSelfie": {
+    "lastSentAt": null,
+    "lastPose": null,
+    "lastConcept": null,
+    "lastAttemptAt": "2026-02-13T17:27:00Z",
+    "lastError": null,
+    "lastDecision": {
+      "eligible": true,
+      "hoursSinceLastSent": null,
+      "probability": 0.09,
+      "roll": 0.833337576134579,
+      "selected": false,
+      "delivered": false,
+      "at": "2026-02-13T17:27:00Z",
+      "notes": "No prior send recorded; using conservative base probability. Throttle: last attempt 1.00h ago."
+    }
+  }
+}

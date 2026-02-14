@@ -1,0 +1,51 @@
+[
+  {
+    "id": "luca-001",
+    "fact": "Name: Luca.",
+    "category": "status",
+    "timestamp": "2026-02-13",
+    "status": "active"
+  },
+  {
+    "id": "luca-002",
+    "fact": "Location/timezone: UK (Europe/London).",
+    "category": "status",
+    "timestamp": "2026-02-13",
+    "status": "active"
+  },
+  {
+    "id": "luca-003",
+    "fact": "X username: @lambchopluca.",
+    "category": "status",
+    "timestamp": "2026-02-13",
+    "status": "active"
+  },
+  {
+    "id": "luca-004",
+    "fact": "Windows PC (lucapc) uses RTX 4080 GPU.",
+    "category": "status",
+    "timestamp": "2026-02-13",
+    "status": "active"
+  },
+  {
+    "id": "luca-005",
+    "fact": "Prefers Discord-first, chat-controlled workflows; dislikes permission-looping and robotic task-mode replies.",
+    "category": "preference",
+    "timestamp": "2026-02-13",
+    "status": "active"
+  },
+  {
+    "id": "luca-006",
+    "fact": "Wants proactive assistant behavior with frequent progress pings and continuous iteration when tasks finish quickly.",
+    "category": "preference",
+    "timestamp": "2026-02-13",
+    "status": "active"
+  },
+  {
+    "id": "luca-007",
+    "fact": "Hard rule: do not share passwords/tokens/keys in chat; everything else ok to use in this server context.",
+    "category": "preference",
+    "timestamp": "2026-02-13",
+    "status": "active"
+  }
+]
